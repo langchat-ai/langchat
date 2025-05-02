@@ -25,15 +25,15 @@ export async function saveMessage(
 }
 
 export async function getSessionMessages(
-  sessionId: string,
-  flowId: string
+  session_id: string,
+  flow_id: string
 ): Promise<ChatMessage[]> {
   try {
     const messageTable = db.table("langchat_messages");
     const messages = await messageTable
       .find({
-        flow_id: flowId,
-        session_id: sessionId,
+        flow_id: flow_id,
+        session_id: session_id,
       })
       .toArray();
 

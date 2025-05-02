@@ -1,13 +1,8 @@
+"use client"
 import { Toolbar } from '../components/Toolbar';
 import { Flow } from '@/app/lib/definitions';
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
-
-async function getFlows(): Promise<Flow[]> {
-  const res = await fetch('http://localhost:5000/api/flows', { cache: 'no-store' });
-  if (!res.ok) throw new Error('Failed to fetch flows');
-  return await res.json();
-}
 
 function ChatIcon() {
   return (
@@ -28,14 +23,34 @@ function ChatIcon() {
   );
 }
 
-async function FlowsList() {
-  const flows = await getFlows() || [];
-  console.log(flows);
+function FlowsList() {
+  const [flows, setFlows] = useState<Flow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchFlows() {
+      try {
+        const res = await fetch('/api/flows', { cache: 'no-store' });
+        if (!res.ok) throw new Error('Failed to fetch flows');
+        const data = await res.json();
+        console.log(data);
+        setFlows(data);
+      } catch (error) {
+        // handle error (optional)
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchFlows();
+  }, []); // Empty dependency array = run only once on mount
+
+  if (loading) return <LoadingFlows />;
+
   return (
     <div className="mt-8 space-y-4">
       {flows.map((flow) => (
         <div 
-          key={flow.id}
+          key={flow.flow_id}
           className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-md transition-shadow"
         >
           <div className="flex items-center justify-between">
@@ -50,7 +65,7 @@ async function FlowsList() {
                 ${flow.status === 'draft' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' : ''}
                 ${flow.status === 'archived' ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' : ''}
               `}>
-                {flow.status} {flow.id.toString()}
+                {flow.status} {flow.flow_id}
               </span>
               <Link 
                 href={`/chat/`}
@@ -62,7 +77,7 @@ async function FlowsList() {
             </div>
           </div>
           <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-            Last updated: {new Date(flow.updatedAt).toLocaleDateString()}
+            Last updated: {new Date(flow.updated_at).toLocaleDateString()}
           </div>
         </div>
       ))}

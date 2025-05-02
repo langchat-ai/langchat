@@ -1,20 +1,20 @@
 import { UUID } from '@datastax/astra-db-ts';
 
 export type Flow = {
-    id: UUID;
+    flow_id: string;
     name: string;
     description: string;
-    createdAt: string;
-    updatedAt: string;
+    created_at: string;
+    updated_at: string;
     status: 'active' | 'draft' | 'archived';
     application: 'Langflow' | 'Langflow Astra';
     endpoint: string;
   };
 
   export type ChatMessage = {
-    id: UUID;
-    flow_id: UUID;
-    session_id: UUID;
+    id: string;
+    flow_id: string;
+    session_id: string;
     text: string;
     sender_name: string;
     timestamp: Date;
