@@ -9,10 +9,10 @@ export async function GET(
     // Get the session ID from the URL params
     const sessionId = params.uuid;
     
-    // Get the flow_id from the query parameters
+    // Get the flowId from the query parameters
     const { searchParams } = new URL(request.url);
     const flowId = searchParams.get("flowId");
-
+    
     if (!flowId) {
       return NextResponse.json(
         { error: "flowId is required" },

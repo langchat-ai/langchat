@@ -3,21 +3,27 @@ import { getDb } from "./astradb";
 import { ChatMessage } from "../definitions";
 const db = await getDb();
 
+export async function saveMessageFeedback(messageId: string, feedback: string) {
+  const messageTable = db.table("langchat_messages");
+  await messageTable.updateOne({id: messageId}, {$set: {feedback: feedback}});
+}
+
 export async function saveMessage(
   message: Omit<ChatMessage, "id" | "timestamp">
 ) {
   try {
     const messageTable = db.table("langchat_messages");
+    const messageId = uuidv4();
     const res = await messageTable.insertOne({
-      id: uuidv4(),
-      flow_id: message.flow_id,
-      session_id: message.session_id,
-      text: message.text,
-      sender_name: message.sender_name,
+      messageId: messageId,
+      flowId: message.flowId,
+      sessionId: message.sessionId,
+      message: message.message,
+      senderName: message.senderName,
       timestamp: new Date().toISOString(),
     });
 
-    return res;
+    return messageId;
   } catch (err) {
     console.error("Error saving message:", err);
     throw err;
@@ -32,8 +38,8 @@ export async function getSessionMessages(
     const messageTable = db.table("langchat_messages");
     const messages = await messageTable
       .find({
-        flow_id: flowId,
-        session_id: sessionId,
+        flowId: flowId,
+        sessionId: sessionId,
       })
       .toArray();
 

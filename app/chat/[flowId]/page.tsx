@@ -1,16 +1,12 @@
 "use client";
 import { Toolbar } from "../../components/Toolbar";
-import type { Flow } from "@/app/lib/definitions";
+import type { Flow, Message } from "@/app/lib/definitions";
 import { useState, useEffect, use, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from 'next/navigation';
-
-type Message = {
-  session_id: string;
-  text: string;
-  sender_name: string;
-  timestamp: string;
-};
+import { LoadingIndicator } from "@/app/components/LoadingIndicator";
+import { ThumbsUpIcon } from "@/app/components/icons/ThumbsUpIcon";
+import { ThumbsDownIcon } from "@/app/components/icons/ThumbsDownIcon";
 
 async function getFlow(flowId: string): Promise<Flow> {
   const res = await fetch(`http://localhost:5000/api/flows/${flowId}`, {
@@ -18,16 +14,6 @@ async function getFlow(flowId: string): Promise<Flow> {
   });
   if (!res.ok) throw new Error("Failed to fetch flow");
   return res.json();
-}
-
-function LoadingIndicator() {
-  return (
-    <div className="flex items-center space-x-2 bg-white dark:bg-gray-800 p-4 rounded-lg max-w-[80%]">
-      <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-      <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-      <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
-    </div>
-  );
 }
 
 function ChatContent({ flowId }: { flowId: string }) {
@@ -61,9 +47,9 @@ function ChatContent({ flowId }: { flowId: string }) {
     try {
       // Add user message to chat
       setMessages(prev => [...prev, {
-        session_id: sessionId,
-        text: message.trim(),
-        sender_name: 'You',
+        sessionId: sessionId,
+        message: message.trim(),
+        senderName: 'You',
         timestamp: new Date().toISOString()
       }]);
       
@@ -76,8 +62,8 @@ function ChatContent({ flowId }: { flowId: string }) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          flowId,
-          sessionId,
+          flowId: flowId,
+          sessionId: sessionId,
           message: message.trim(),
         }),
       });
@@ -91,9 +77,9 @@ function ChatContent({ flowId }: { flowId: string }) {
       setMessages((prev) => [
         ...prev,
         {
-          session_id: resultMessage.session_id,
-          text: resultMessage.text,
-          sender_name: resultMessage.sender_name,
+          sessionId: sessionId,
+          message: resultMessage.message,
+          senderName: resultMessage.senderName,
           timestamp: resultMessage.timestamp,
         },
       ]);
@@ -156,15 +142,33 @@ function ChatContent({ flowId }: { flowId: string }) {
                 <div 
                   key={index}
                   className={`p-4 rounded-lg ${
-                    msg.sender_name === 'You' 
+                    msg.senderName === 'You' 
                       ? 'bg-blue-500 text-white ml-auto' 
                       : 'bg-white dark:bg-gray-800 dark:text-white'
                   } max-w-[80%]`}
                 >
-                  <div className="font-medium mb-1">{msg.sender_name}</div>
-                  <div>{msg.text}</div>
-                  <div className="text-xs opacity-70 mt-1">
-                    {new Date(msg.timestamp).toLocaleTimeString()}
+                  <div className="font-medium mb-1">{msg.senderName}</div>
+                  <div>{msg.message}</div>
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="text-xs opacity-70">
+                      {new Date(msg.timestamp).toLocaleTimeString()}
+                    </div>
+                    {msg.senderName !== 'You' && (
+                      <div className="flex space-x-2">
+                        <button
+                          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                          aria-label="Thumbs up"
+                        >
+                          <ThumbsUpIcon />
+                        </button>
+                        <button
+                          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                          aria-label="Thumbs down"
+                        >
+                          <ThumbsDownIcon />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

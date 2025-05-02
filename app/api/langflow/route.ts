@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
-import { mockFlows } from "@/app/lib/mock-data";
 import { Flow } from "@/app/lib/definitions";
-import { headers } from "next/headers";
+import { LangflowClient } from "@datastax/langflow-client";
 import { saveMessage } from "@/app/lib/db/messageQueries";
+import { getFlow } from "@/app/lib/db/flowModel";
+import { UUID } from "@datastax/astra-db-ts";
+import { environments } from "@/app/lib/config";
+import { updateSession } from "@/app/lib/db/sessionQueries";
 
 type ChatRequest = {
   flowId: string;
@@ -23,65 +26,56 @@ export async function POST(request: Request) {
       );
     }
 
-    const flow: Flow | undefined = mockFlows.find((f) => f.id === flowId);
+    const flowInfo = await getFlow(flowId);
 
-    if (!flow) {
-      return NextResponse.json({ error: "Flow not found" }, { status: 404 });
-    }
+    const environment =
+      environments.find((e) => e.id === flowInfo.environment) ||
+      environments[0];
 
-    await saveMessage({
-      flow_id: flowId,
-      session_id: sessionId,
-      text: message,
-      sender_name: "user",
+    await updateSession({
+      userId: process.env.USER_ID || "",
+      flowId: flowId,
+      sessionId: sessionId,
+      summary: "",
     });
 
-    try {
-      const headers = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.LANGFLOW_API_KEY}`,
-      };
+    const messageId = await saveMessage({
+      flowId: new UUID(flowId),
+      sessionId: new UUID(sessionId),
+      message: message,
+      senderName: "user",
+    });
 
-      const body = {
-        input_value: message,
-        input_type: "chat",
-        output_type: "chat",
-        session_id: sessionId,
-      };
+    const client = new LangflowClient({
+      //baseUrl: environment.baseUrl.replace(/<([^>]+)>/g, (_, variable) => process.env[variable] || ''),
+      langflowId: process.env[environment.langflowIdEnvVar],
+      apiKey: process.env[environment.tokenEnvVar],
+    });
 
-      console.log(body);
+    const flow = client.flow(flowInfo.flowEndpoint);
 
-      const response = await fetch(flow.endpoint, {
-        method: "POST",
-        headers: headers,
-        body: JSON.stringify(body),
-      });
+    const response = await flow.run(message);
 
-      const responseMessage = await response.json();
-      if (!response.ok) {
-        throw new Error(
-          `${response.status} ${response.statusText} - ${JSON.stringify(
-            responseMessage
-          )}`
-        );
-      }
+    const result = response.outputs[0].outputs[0].results.message;
+    const resultMessage = {
+      id: messageId,
+      flowId: flowId,
+      sessionId: sessionId,
+      message: response.chatOutputText(),
+      senderName: result.sender_name,
+      timestamp: result.timestamp,
+    };
 
-      const result = responseMessage.outputs[0].outputs[0].results.message;
-      const resultMessage = {
-        flow_id: flowId,
-        session_id: result.session_id,
-        text: result.text,
-        sender_name: result.sender_name,
-        timestamp: result.timestamp,
-      };
+    const savedMessageId = await saveMessage({
+      flowId: new UUID(flowId),
+      sessionId: new UUID(sessionId),
+      message: result.text,
+      senderName: result.sender_name,
+    });
 
-      await saveMessage(resultMessage);
+    resultMessage.id = savedMessageId;
 
-      return NextResponse.json(resultMessage);
-    } catch (error) {
-      console.error("Request Error:", error.message);
-      throw error;
-    }
+    return NextResponse.json(resultMessage);
   } catch (error) {
     console.error("Error processing chat request:", error);
     return NextResponse.json(

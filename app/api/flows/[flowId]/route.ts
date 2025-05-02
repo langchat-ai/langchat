@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getFlow } from '@/app/lib/db/flowQueries';
+import { getFlow } from '@/app/lib/db/flowModel';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { flowId: string } }
 ) {
-  const flow = await getFlow(params.id);
+  const { flowId } = await params;
+  const flow = await getFlow(flowId);
 
   if (!flow) {
     return NextResponse.json(
