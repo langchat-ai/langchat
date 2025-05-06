@@ -68,7 +68,7 @@ function FlowsList() {
                 {flow.status} {flow.flow_id}
               </span>
               <Link 
-                href={`/chat/`}
+                href={`/chat/${flow.flow_id}`}
                 className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 aria-label="Start chat"
               >

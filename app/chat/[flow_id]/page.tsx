@@ -12,8 +12,8 @@ type Message = {
   timestamp: string;
 };
 
-async function getFlow(flowId: string): Promise<Flow> {
-  const res = await fetch(`http://localhost:5000/api/flows/${flowId}`, {
+async function getFlow(flow_id: string): Promise<Flow> {
+  const res = await fetch(`http://localhost:5000/api/flows/${flow_id}`, {
     cache: "no-store",
   });
   if (!res.ok) throw new Error("Failed to fetch flow");
@@ -30,12 +30,12 @@ function LoadingIndicator() {
   );
 }
 
-function ChatContent({ flowId }: { flowId: string }) {
+function ChatContent({ flow_id }: { flow_id: string }) {
   const router = useRouter();
   const [flow, setFlow] = useState<Flow | null>(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
-  const [sessionId] = useState(uuidv4());
+  const [session_id] = useState(uuidv4());
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -49,11 +49,11 @@ function ChatContent({ flowId }: { flowId: string }) {
 
   useEffect(() => {
     const loadFlow = async () => {
-      const flowData = await getFlow(flowId);
+      const flowData = await getFlow(flow_id);
       setFlow(flowData);
     };
     loadFlow();
-  }, [flowId]);
+  }, [flow_id]);
 
   const handleSubmit = async () => {
     if (!message.trim() || isLoading) return;
@@ -61,7 +61,7 @@ function ChatContent({ flowId }: { flowId: string }) {
     try {
       // Add user message to chat
       setMessages(prev => [...prev, {
-        session_id: sessionId,
+        session_id: session_id,
         text: message.trim(),
         sender_name: 'You',
         timestamp: new Date().toISOString()
@@ -76,8 +76,8 @@ function ChatContent({ flowId }: { flowId: string }) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          flowId,
-          sessionId,
+          flow_id: flow_id,
+          session_id: session_id,
           message: message.trim(),
         }),
       });
@@ -216,14 +216,14 @@ function LoadingChat() {
 export default function ChatPage({
   params,
 }: {
-  params: Promise<{ flowId: string }> | { flowId: string };
+  params: Promise<{ flow_id: string }> | { flow_id: string };
 }) {
   const resolvedParams = use(params);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
       <Toolbar />
-      <ChatContent flowId={resolvedParams.flowId} />
+      <ChatContent flow_id={resolvedParams.flow_id} />
     </div>
   );
 }

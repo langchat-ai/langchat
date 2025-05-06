@@ -3,35 +3,38 @@ import { mockFlows } from "@/app/lib/mock-data";
 import { Flow } from "@/app/lib/definitions";
 import { headers } from "next/headers";
 import { saveMessage } from "@/app/lib/db/messageQueries";
+import { getFlow } from "@/app/lib/db/flowManageOperation";
 
 type ChatRequest = {
-  flowId: string;
-  sessionId: string;
+  flow_id: string;
+  session_id: string;
+  user_id?: string;
+  sender_name: string;
   message: string;
 };
 
 export async function POST(request: Request) {
   try {
     const body: ChatRequest = await request.json();
-    const { flowId, sessionId, message } = body;
+    const { flow_id, session_id, message } = body;
 
     // Validate required parameters
-    if (!flowId || !sessionId || !message) {
+    if (!flow_id || !session_id || !message) {
       return NextResponse.json(
         { error: "Missing required parameters" },
         { status: 400 }
       );
     }
 
-    const flow: Flow | undefined = mockFlows.find((f) => f.id === flowId);
+    const flow: Flow | undefined = await getFlow(flow_id);
 
     if (!flow) {
       return NextResponse.json({ error: "Flow not found" }, { status: 404 });
     }
 
     await saveMessage({
-      flow_id: flowId,
-      session_id: sessionId,
+      flow_id: flow_id,
+      session_id: session_id,
       text: message,
       sender_name: "user",
     });
@@ -46,10 +49,12 @@ export async function POST(request: Request) {
         input_value: message,
         input_type: "chat",
         output_type: "chat",
-        session_id: sessionId,
+        session_id: session_id,
       };
 
-      console.log(body);
+      console.log("flow", flow);
+      console.log("headers", headers);
+      console.log("body", body);
 
       const response = await fetch(flow.endpoint, {
         method: "POST",
@@ -68,7 +73,7 @@ export async function POST(request: Request) {
 
       const result = responseMessage.outputs[0].outputs[0].results.message;
       const resultMessage = {
-        flow_id: flowId,
+        flow_id: flow_id,
         session_id: result.session_id,
         text: result.text,
         sender_name: result.sender_name,

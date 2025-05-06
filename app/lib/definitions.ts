@@ -9,6 +9,7 @@ export type Flow = {
     status: 'active' | 'draft' | 'archived';
     application: 'Langflow' | 'Langflow Astra';
     endpoint: string;
+    environment?: string;
   };
 
   export type ChatMessage = {

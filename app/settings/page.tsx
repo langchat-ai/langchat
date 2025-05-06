@@ -1,4 +1,4 @@
-import { Toolbar } from '../../components/Toolbar';
+import { Toolbar } from '@/app/components/Toolbar';
 import { SETTINGS_SECTIONS } from '@/app/lib/settings';
 import Link from 'next/link';
 

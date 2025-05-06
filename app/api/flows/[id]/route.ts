@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getFlow } from '@/app/lib/db/flowQueries';
+import { getFlow } from '@/app/lib/db/flowOperation';
 
 export async function GET(
   request: Request,

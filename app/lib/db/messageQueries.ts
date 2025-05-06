@@ -1,15 +1,16 @@
 import { v4 as uuidv4 } from "uuid";
 import { getDb } from "./astradb";
 import { ChatMessage } from "../definitions";
+import { config } from "../settings";
 const db = await getDb();
 
 export async function saveMessage(
   message: Omit<ChatMessage, "id" | "timestamp">
 ) {
   try {
-    const messageTable = db.table("langchat_messages");
+    const messageTable = db.table(config.MESSAGE_TABLE);
     const res = await messageTable.insertOne({
-      id: uuidv4(),
+      message_id: uuidv4(),
       flow_id: message.flow_id,
       session_id: message.session_id,
       text: message.text,
@@ -29,7 +30,7 @@ export async function getSessionMessages(
   flow_id: string
 ): Promise<ChatMessage[]> {
   try {
-    const messageTable = db.table("langchat_messages");
+    const messageTable = db.table(config.MESSAGE_TABLE);
     const messages = await messageTable
       .find({
         flow_id: flow_id,

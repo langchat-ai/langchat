@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS langchat_flows (
   status text,
   application text,
   endpoint text,
-  PRIMARY KEY (id)
+  roles set<text>,
+  PRIMARY KEY (flow_id)
 );
 
 CREATE TABLE langchat_sessions (
