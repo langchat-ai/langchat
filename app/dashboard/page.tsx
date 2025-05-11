@@ -65,7 +65,7 @@ function FlowsList() {
                 ${flow.status === 'draft' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' : ''}
                 ${flow.status === 'archived' ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' : ''}
               `}>
-                {flow.status} {flow.flow_id}
+                {flow.status}
               </span>
               <Link 
                 href={`/chat/${flow.flow_id}`}

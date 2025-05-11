@@ -14,6 +14,11 @@ export const SETTINGS_SECTIONS: SettingSection[] = [
   },
 ];
 
+export const APPLICATION_OPTIONS = [
+  { value: "Langflow", label: "Langflow" },
+  { value: "Langflow Astra", label: "Langflow Astra" },
+];
+
 export const config = {
   FLOW_TABLE: "langchat_flows",
   SESSION_TABLE: "langchat_sessions",

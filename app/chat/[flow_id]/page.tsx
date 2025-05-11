@@ -4,6 +4,7 @@ import type { Flow } from "@/app/lib/definitions";
 import { useState, useEffect, use, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from 'next/navigation';
+import ReactMarkdown from 'react-markdown';
 
 type Message = {
   session_id: string;
@@ -70,7 +71,7 @@ function ChatContent({ flow_id }: { flow_id: string }) {
       // Show loading state
       setIsLoading(true);
       
-      const response = await fetch('/api/langflow', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -162,7 +163,11 @@ function ChatContent({ flow_id }: { flow_id: string }) {
                   } max-w-[80%]`}
                 >
                   <div className="font-medium mb-1">{msg.sender_name}</div>
-                  <div>{msg.text}</div>
+                  <div className="prose dark:prose-invert prose-sm max-w-none">
+                    <ReactMarkdown>
+                      {msg.text}
+                    </ReactMarkdown>
+                  </div>
                   <div className="text-xs opacity-70 mt-1">
                     {new Date(msg.timestamp).toLocaleTimeString()}
                   </div>

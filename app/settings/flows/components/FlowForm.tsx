@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { FormField } from "@/app/components/FormField";
 import { SelectField } from "@/app/components/SelectField";
 import { environments as ENVIRONMENT_OPTIONS } from "@/app/lib/settings";
@@ -14,6 +14,8 @@ const STATUS_OPTIONS = [
   { value: "archived", label: "Archived" },
 ];
 
+import { APPLICATION_OPTIONS } from "@/app/lib/settings";
+
 interface FlowFormProps {
   flow: Omit<Flow, 'created_at' | 'updated_at'> & {
     created_at: string;
@@ -25,19 +27,18 @@ interface FlowFormProps {
 export function FlowForm({ flow: initialFlow, isNewFlow }: FlowFormProps) {
   const router = useRouter();
   const [flow, setFlow] = useState(initialFlow);
-
+  
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
     
     try {
-      // Convert FormData to JSON object
       const flowData = {
-        flow_id: formData.get('flow_id')?.toString(),
-        name: formData.get('name')?.toString(),
-        environment: formData.get('environment')?.toString(),
-        status: formData.get('status')?.toString(),
-        description: formData.get('description')?.toString(),
+        flow_id: flow.flow_id,
+        name: flow.name,
+        status: flow.status,
+        description: flow.description,
+        endpoint: flow.endpoint,
+        application: flow.application,
         // Include other fields as needed
       };
       
@@ -92,16 +93,15 @@ export function FlowForm({ flow: initialFlow, isNewFlow }: FlowFormProps) {
         required
       />      
 
-
       <SelectField
-        label="Environment"
-        name="environment"
-        options={ENVIRONMENT_OPTIONS.map(env => ({
-          value: env.id,
-          label: env.name
+        label="Application"
+        name="application"
+        options={APPLICATION_OPTIONS.map(app => ({
+          value: app.value,
+          label: app.label
         }))}
-        value={flow.environment}
-        onChange={(value) => setFlow({ ...flow, environment: value })}
+        value={flow.application}
+        onChange={(value) => setFlow({ ...flow, application: value })}
         required
       />
       
@@ -113,7 +113,7 @@ export function FlowForm({ flow: initialFlow, isNewFlow }: FlowFormProps) {
           label: status.label
         }))}
         value={flow.status}
-        onChange={(value) => setFlow({ ...flow, status: value as "active" | "draft" | "archived" })}
+        onChange={(value) => setFlow({ ...flow, status: value})}
         required
       />
       <Form.Submit className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">

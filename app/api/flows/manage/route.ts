@@ -3,13 +3,14 @@ import { getFlows, createFlow, updateFlow } from "@/app/lib/db/flowManageOperati
 
 export async function GET(request: Request) {
   const flows = await getFlows();
-  console.log(flows)
+  //console.log("GET MANAGE flows", flows);
   return NextResponse.json(flows);
 }
 
 export async function POST(request: Request) {
   const flow = await request.json();
-  if (flow.flowId) {
+  console.log("POST MANAGE flow", flow);
+  if (flow.flow_id) {
     const newFlow = await updateFlow(flow);
     return NextResponse.json(newFlow);
   } else {

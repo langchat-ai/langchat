@@ -20,10 +20,10 @@ export async function getFlows(): Promise<Flow[]> {
   }
 }
 
-export async function getFlow(id: string): Promise<Flow> {
+export async function getFlow(flow_id: string): Promise<Flow> {
   try {
     const flowTable = db.table("langchat_flows");
-    const flow = await flowTable.findOne({ flow_id: id });
+    const flow = await flowTable.findOne({ flow_id: flow_id });
     return flow as Flow;
   } catch (err) {
     console.error("Error fetching flow:", err);

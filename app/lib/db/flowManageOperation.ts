@@ -1,3 +1,15 @@
+/**
+ * @fileoverview Flow management operations
+ * @author Samuel Matioli
+ * @version 1.0.0
+ * @since 2025-05-11
+ */
+
+
+/* To-Do:
+- Filter flows based on role
+*/
+
 import { getDb } from "./astradb";
 import { ChatMessage, Flow } from "../definitions";
 import { v4 as uuidv4 } from 'uuid';

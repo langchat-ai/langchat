@@ -6,8 +6,8 @@ export type Flow = {
     description: string;
     created_at: string;
     updated_at: string;
-    status: 'active' | 'draft' | 'archived';
-    application: 'Langflow' | 'Langflow Astra';
+    status: string;
+    application: string; 
     endpoint: string;
     environment?: string;
   };

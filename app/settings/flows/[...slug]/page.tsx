@@ -43,9 +43,9 @@ export default function EditFlowPage({
               created_at: flowData.created_at instanceof Date 
                 ? flowData.created_at.toISOString() 
                 : flowData.created_at,
-              updatedAt: flowData.updatedAt instanceof Date 
-                ? flowData.updatedAt.toISOString() 
-                : flowData.updatedAt,
+              updated_at: flowData.updated_at instanceof Date 
+                ? flowData.updated_at.toISOString() 
+                : flowData.updated_at,
             });
           } else {
             console.error("Failed to fetch flow data");

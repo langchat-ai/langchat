@@ -40,6 +40,19 @@ export async function POST(request: Request) {
     });
 
     try {
+
+      if (flow.application === "Langflow") {
+        const resultMessage = await invokeLangflow(flow, message, session_id);
+        await saveMessage(resultMessage);
+        return NextResponse.json(resultMessage);
+      } else {
+        return NextResponse.json({ error: "Unsupported application" }, { status: 400 });
+      }
+    } catch (error) {
+      console.error("Request Error:", error.message);
+      throw error;
+    }
+
       const headers = {
         "Content-Type": "application/json",
         Authorization: `Bearer ${process.env.LANGFLOW_API_KEY}`,
@@ -61,6 +74,7 @@ export async function POST(request: Request) {
         headers: headers,
         body: JSON.stringify(body),
       });
+      console.log("response", response);
 
       const responseMessage = await response.json();
       if (!response.ok) {
@@ -95,3 +109,43 @@ export async function POST(request: Request) {
     );
   }
 }
+
+const invokeLangflow = async (flow: Flow, message: string, session_id: string) => {
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${process.env.LANGFLOW_API_KEY}`,
+  };
+
+  const body = {
+    input_value: message,
+    input_type: "chat",
+    output_type: "chat",
+    session_id: session_id,
+  };
+
+  const response = await fetch(flow.endpoint, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(body),
+  });
+
+  const responseMessage = await response.json();
+  if (!response.ok) {
+    throw new Error(
+      `${response.status} ${response.statusText} - ${JSON.stringify(
+        responseMessage
+      )}`
+    );
+  }
+
+  const result = responseMessage.outputs[0].outputs[0].results.message;
+  const resultMessage = {
+    flow_id: flow.flow_id,
+    session_id: result.session_id,
+    text: result.text,
+    sender_name: result.sender_name,
+    timestamp: result.timestamp,
+  };
+
+  return resultMessage;
+};
