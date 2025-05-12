@@ -16,6 +16,7 @@ export type Flow = {
     id: string;
     flow_id: string;
     session_id: string;
+    user_id: string;
     text: string;
     sender_name: string;
     timestamp: Date;

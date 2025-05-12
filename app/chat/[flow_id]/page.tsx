@@ -2,7 +2,7 @@
 import { Toolbar } from "../../components/Toolbar";
 import type { Flow } from "@/app/lib/definitions";
 import { useState, useEffect, use, useRef } from "react";
-import { v4 as uuidv4 } from "uuid";
+import { v1 as uuidv1 } from "uuid";
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 
@@ -36,7 +36,7 @@ function ChatContent({ flow_id }: { flow_id: string }) {
   const [flow, setFlow] = useState<Flow | null>(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
-  const [session_id] = useState(uuidv4());
+  const [session_id] = useState(uuidv1());
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -80,6 +80,7 @@ function ChatContent({ flow_id }: { flow_id: string }) {
           flow_id: flow_id,
           session_id: session_id,
           message: message.trim(),
+          user_id: "3f702388-445a-4ada-b363-31e2efe1cb65" // TO-DO get user_id from login,
         }),
       });
 

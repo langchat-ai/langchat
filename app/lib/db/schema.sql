@@ -26,7 +26,8 @@ CREATE TABLE langchat_sessions (
     flow_id text,
     session_id text,
     created_at timestamp,
-    summary text,
+    title text,
     updated_at timestamp,
+    options map<text, text>,
     PRIMARY KEY ((user_id, flow_id), session_id)
-) WITH CLUSTERING ORDER BY (session_id ASC);
+) WITH CLUSTERING ORDER BY (session_id DESC);

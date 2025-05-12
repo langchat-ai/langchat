@@ -18,6 +18,19 @@ export async function saveMessage(
       timestamp: new Date().toISOString(),
     });
 
+    const sessionTable = db.table(config.SESSION_TABLE);
+    const sessionRes = await sessionTable.updateOne({
+      user_id: message.user_id,
+      session_id: message.session_id,
+      flow_id: message.flow_id,
+    }, {
+      $set: {
+        updated_at: new Date().toISOString(),
+      },
+    });
+
+
+
     return res;
   } catch (err) {
     console.error("Error saving message:", err);

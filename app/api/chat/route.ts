@@ -8,7 +8,7 @@ import { getFlow } from "@/app/lib/db/flowManageOperation";
 type ChatRequest = {
   flow_id: string;
   session_id: string;
-  user_id?: string;
+  user_id: string;
   sender_name: string;
   message: string;
 };
@@ -16,7 +16,7 @@ type ChatRequest = {
 export async function POST(request: Request) {
   try {
     const body: ChatRequest = await request.json();
-    const { flow_id, session_id, message } = body;
+    const { flow_id, session_id, message, user_id } = body;
 
     // Validate required parameters
     if (!flow_id || !session_id || !message) {
@@ -37,12 +37,16 @@ export async function POST(request: Request) {
       session_id: session_id,
       text: message,
       sender_name: "user",
+      user_id: user_id,
     });
 
     try {
       if (flow.application === "Langflow") {
         const resultMessage = await invokeLangflow(flow, message, session_id);
-        await saveMessage(resultMessage);
+        await saveMessage({
+          ...resultMessage,
+          user_id: user_id,
+        });
         return NextResponse.json(resultMessage);
       } else {
         return NextResponse.json({ error: "Unsupported application" }, { status: 400 });
