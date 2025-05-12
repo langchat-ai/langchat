@@ -40,7 +40,6 @@ export async function POST(request: Request) {
     });
 
     try {
-
       if (flow.application === "Langflow") {
         const resultMessage = await invokeLangflow(flow, message, session_id);
         await saveMessage(resultMessage);
@@ -49,56 +48,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Unsupported application" }, { status: 400 });
       }
     } catch (error) {
-      console.error("Request Error:", error.message);
-      throw error;
-    }
-
-      const headers = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.LANGFLOW_API_KEY}`,
-      };
-
-      const body = {
-        input_value: message,
-        input_type: "chat",
-        output_type: "chat",
-        session_id: session_id,
-      };
-
-      console.log("flow", flow);
-      console.log("headers", headers);
-      console.log("body", body);
-
-      const response = await fetch(flow.endpoint, {
-        method: "POST",
-        headers: headers,
-        body: JSON.stringify(body),
-      });
-      console.log("response", response);
-
-      const responseMessage = await response.json();
-      if (!response.ok) {
-        throw new Error(
-          `${response.status} ${response.statusText} - ${JSON.stringify(
-            responseMessage
-          )}`
-        );
-      }
-
-      const result = responseMessage.outputs[0].outputs[0].results.message;
-      const resultMessage = {
-        flow_id: flow_id,
-        session_id: result.session_id,
-        text: result.text,
-        sender_name: result.sender_name,
-        timestamp: result.timestamp,
-      };
-
-      await saveMessage(resultMessage);
-
-      return NextResponse.json(resultMessage);
-    } catch (error) {
-      console.error("Request Error:", error.message);
+      console.error("Request Error:", error);
       throw error;
     }
   } catch (error) {
@@ -122,6 +72,8 @@ const invokeLangflow = async (flow: Flow, message: string, session_id: string) =
     output_type: "chat",
     session_id: session_id,
   };
+
+  console.log("Invoking Langflow with body", flow.endpoint, body);
 
   const response = await fetch(flow.endpoint, {
     method: "POST",
